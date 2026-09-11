@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
@@ -21,11 +22,18 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -43,14 +51,17 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun ProfileScreen() {
-    val darkBackground = Color(0xFF525254)
-    val purpleAccent = Color(0xFF009688)
-    val lightPurpleText = Color(0xFFF5F5F5)
+    val Background = Color(0xFF525254)
+    val Accent = Color(0xFF009688)
+    val Text = Color(0xFFF5F5F5)
+
+    var isFollowing by rememberSaveable{mutableStateOf(false)}
+    var viewCount by remember { mutableIntStateOf(0) }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(darkBackground)
+            .background(Background)
             .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
@@ -63,7 +74,7 @@ fun ProfileScreen() {
             modifier = Modifier
                 .size(130.dp)
                 .clip(CircleShape)
-                .border(3.dp, lightPurpleText, CircleShape)
+                .border(3.dp, Text, CircleShape)
         )
 
         Spacer(modifier = Modifier.height(20.dp))
@@ -108,25 +119,85 @@ fun ProfileScreen() {
                 onClick = { },
                 shape = RoundedCornerShape(20.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = purpleAccent,
-                    contentColor = darkBackground
+                    containerColor = Accent,
+                    contentColor = Background
                 ),
-                modifier = Modifier.height(42.dp)
+                modifier = Modifier
+                    .width(120.dp)
+                    .height(42.dp)
             ) {
                 Text(text = "Message", fontWeight = FontWeight.Bold)
             }
-// for the follow button
-            OutlinedButton(
-                onClick = { },
-                shape = RoundedCornerShape(20.dp),
-                colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White),
-                modifier = Modifier.height(42.dp)
-            ) {
-                Text(text = "Follow")
-            }
+// for the follow buttons
+            FollowButton(
+                isFollowing = isFollowing,
+                onToggle = { isFollowing = !isFollowing },
+                accentColor = Accent,
+                backgroundColor = Background
+            )
+        }
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        ProfileViewCounter(
+            viewCount = viewCount,
+            onIncrement = {viewCount++ },
+            accentColor = Accent
+
+        )
+    }
+}
+// for the viewer count button when you click the number will increment
+@Composable
+fun ProfileViewCounter(viewCount: Int,
+                       onIncrement: () -> Unit,
+                       accentColor: Color,
+                       modifier: Modifier = Modifier
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = modifier
+    ) {
+        Text(
+            text = "Profile views: $viewCount",
+            fontSize = 15.sp,
+            color = Color.LightGray
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        OutlinedButton(
+            onClick = onIncrement,
+            shape = RoundedCornerShape(12.dp),
+            colors = ButtonDefaults.outlinedButtonColors(contentColor = accentColor)
+        ) {
+            Text(text = "+1")
         }
     }
 }
+//follow botton it will highlights the button you click
+@Composable
+fun FollowButton(isFollowing: Boolean,
+                 onToggle: () -> Unit,
+                 accentColor: Color,
+                 backgroundColor: Color,
+                 modifier: Modifier = Modifier
+) {
+    Button(
+        onClick = onToggle,
+        shape = RoundedCornerShape(20.dp),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = accentColor,
+            contentColor = backgroundColor
+        ),
+        modifier = modifier
+            .width(120.dp)
+            .height(42.dp)
+    ) {
+        Text(text = "Follow")
+    }
+}
+
 
 @Preview(showBackground = true)
 @Composable
